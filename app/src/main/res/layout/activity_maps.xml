@@ -35,6 +35,15 @@
         app:layout_constraintVertical_bias="0.908">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/action_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_colorNormal="@color/colorAccent"
+            app:fab_colorPressed="@color/colorAccentDark"
+            app:fab_icon="@drawable/ic_clear_all_black_24dp"
+            app:fab_title="Clear the Map" />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/action_event"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
