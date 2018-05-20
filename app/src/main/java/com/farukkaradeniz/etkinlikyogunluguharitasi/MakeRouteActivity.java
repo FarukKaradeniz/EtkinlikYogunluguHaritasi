@@ -100,7 +100,8 @@ public class MakeRouteActivity extends AppCompatActivity implements RoutingListe
 
     @Override
     public void onRoutingStart() {
-
+        //TODO Progress bar göster. Success ve Failure'da bitir
+        // Ya da şu : https://github.com/Tapadoo/Alerter kütüphane hoş duruyor onu da yapabilirsin
     }
 
     @Override
