@@ -23,6 +23,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -58,6 +60,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FirebaseFirestore firestore;
     private CollectionReference eventRef, placeRef;
     private ClusterManager<Event> clusterManager;
+    private List<Event> events;
+    private List<Circle> circles;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +72,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void init() {
+        circles = new ArrayList<>();
+        events = new ArrayList<>();
         showEvent = findViewById(R.id.action_event);
         makeRoute = findViewById(R.id.action_route);
         clearMap = findViewById(R.id.action_clear);
@@ -124,6 +130,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
         clearMap.setOnClickListener(view -> {
             clusterManager.clearItems();
+            clusterManager.cluster();
+            events.clear();
+            for (Circle circle : circles) {
+                circle.remove();
+            }
+            circles.clear();
+            route.remove();
         });
         baskaTarih.setOnClickListener(view -> {
             dateDialog.show();
@@ -211,6 +224,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         for (DocumentSnapshot document : documents) {
                                             Place place = document.toObject(Place.class);
                                             event.setPlace(place);
+                                            events.add(event);
                                             clusterManager.addItem(event);
                                             clusterManager.cluster();
                                         }
@@ -265,8 +279,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnCameraIdleListener(clusterManager);
         mMap.setOnMarkerClickListener(clusterManager);
         clusterManager.setRenderer(new EventRenderer(this, mMap, clusterManager));
+        clusterManager.setOnClusterItemClickListener(event -> {
+            Log.i(TAG, "setupClusterManager: " + event.toString());
+            //todo etkinliğin detayları bir dialogta gösterilecek
+            return true;
+        });
         clusterManager.setOnClusterClickListener(cluster -> {
             Toast.makeText(MapsActivity.this, "Size: " + cluster.getSize(), Toast.LENGTH_SHORT).show();
+            //todo cluster içerisindeki etkinlikler bir liste halinde gösterilecek
             return true;
         });
     }
@@ -280,6 +300,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         options.width(10);
         options.color(Color.BLUE);
         route = mMap.addPolyline(options);
+        if (!events.isEmpty()) {
+            for (Event event : events) {
+                for (LatLng point : points) {
+                    if (Utils.isWithinXmeter(event.getPosition(), point, 400)) {
+                        boolean x = false;
+                        for (Circle circle : circles) {
+                            if (circle.getCenter().equals(event.getPosition())) {
+                                x = true;
+                            }
+                        }
+                        if (!x) {
+                            Circle circle = mMap.addCircle(
+                                    new CircleOptions()
+                                            .center(event.getPosition())
+                                            .fillColor(0x66_ab_47_bc)
+                                            .radius(400)
+                                            .strokeColor(0x66_79_0e_8b));
+                            circles.add(circle);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void haftasonuHesapla() {

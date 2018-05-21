@@ -28,4 +28,9 @@ public class Utils {
         secondLocation.setLatitude(second.latitude);
         return firstLocation.distanceTo(secondLocation);
     }
+
+    public static boolean isWithinXmeter(LatLng first, LatLng second, int x) {
+        double distance = Utils.getDistance(first, second);
+        return !(distance > x);
+    }
 }
