@@ -58,6 +58,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
         showEvent.setOnClickListener(view -> {
             Toast.makeText(this, "Show Event", Toast.LENGTH_SHORT).show();
+            startActivityForResult(new Intent(this, EventFilterActivity.class), 22);
         });
         clearMap.setOnClickListener(view -> {
             Toast.makeText(this, "Clear the Map", Toast.LENGTH_SHORT).show();
@@ -100,6 +101,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             ArrayList<LatLng> points = data.getParcelableArrayListExtra("points");
             createRoute(points);
             Log.i(TAG, "onActivityResult: Route points size: " + points.size());
+        } else if (requestCode == 22 && resultCode == RESULT_OK) {
+            //XXXXXDASADASD
+            Log.i(TAG, "onActivityResult: 22");
         }
     }
 
