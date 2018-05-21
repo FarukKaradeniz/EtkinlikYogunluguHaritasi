@@ -30,7 +30,6 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 
 import java.text.SimpleDateFormat;
@@ -66,7 +65,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_maps);
         init();
         listeners();
-
     }
 
     private void init() {
@@ -88,6 +86,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         categories = dialogView.findViewById(R.id.spinner_categories);
         categories.setPrompt("Lütfen Kategori Seçiniz");
         secilenTarih = dialogView.findViewById(R.id.secilen_tarih);
+
         cal = Calendar.getInstance();
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         formatDate = sdf.format(cal.getTime());
@@ -106,10 +105,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             format2Date = sdf.format(cal.getTime());
             secilenTarih.setText("Secilen Tarihler: \n" + formatDate + "\n" + format2Date);
         }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+
         firestore = FirebaseFirestore.getInstance();
         eventRef = firestore.collection("events");
         placeRef = firestore.collection("places");
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -120,11 +120,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             startActivityForResult(new Intent(this, MakeRouteActivity.class), 11);
         });
         showEvent.setOnClickListener(view -> {
-            Toast.makeText(this, "Show Event", Toast.LENGTH_SHORT).show();
             dialog.show();
         });
         clearMap.setOnClickListener(view -> {
-            Toast.makeText(this, "Clear the Map", Toast.LENGTH_SHORT).show();
             clusterManager.clearItems();
         });
         baskaTarih.setOnClickListener(view -> {
@@ -204,26 +202,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     List<DocumentSnapshot> documents1 = task1.getResult().getDocuments();
                     for (DocumentSnapshot documentSnapshot : documents1) {
                         Event event = documentSnapshot.toObject(Event.class);
-                        Log.i(TAG, "listeners: event" + event.toString());
                         placeRef.whereEqualTo("city", city)
                                 .whereEqualTo("name", event.getPlaceName())
                                 .get()
                                 .addOnCompleteListener(task -> {
-                                    Log.i(TAG, "listeners: task");
                                     if (task.isSuccessful() && task.isComplete()) {
-                                        Log.i(TAG, "listeners: here");
                                         List<DocumentSnapshot> documents = task.getResult().getDocuments();
                                         for (DocumentSnapshot document : documents) {
                                             Place place = document.toObject(Place.class);
                                             event.setPlace(place);
-                                            // todo haritada eklenme kısmı
                                             clusterManager.addItem(event);
                                             clusterManager.cluster();
                                         }
                                     }
                                 });
-
-                        Log.i(TAG, "listeners: event:" + event.toString());
                     }
                 } else {
                     Toast.makeText(this, "Error getting the data from the database", Toast.LENGTH_SHORT).show();
@@ -254,19 +246,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.traffic) {
-            Toast.makeText(this, "Traffic", Toast.LENGTH_SHORT).show();
+            mMap.setTrafficEnabled(!mMap.isTrafficEnabled());
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.i(TAG, "onActivityResult: ");
         if (requestCode == 11 && resultCode == RESULT_OK) {
             floatMenu.collapse();
             ArrayList<LatLng> points = data.getParcelableArrayListExtra("points");
             createRoute(points);
-            Log.i(TAG, "onActivityResult: Route points size: " + points.size());
         }
     }
 
@@ -275,12 +265,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnCameraIdleListener(clusterManager);
         mMap.setOnMarkerClickListener(clusterManager);
         clusterManager.setRenderer(new EventRenderer(this, mMap, clusterManager));
-        clusterManager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<Event>() {
-            @Override
-            public boolean onClusterClick(Cluster<Event> cluster) {
-                Toast.makeText(MapsActivity.this, "Size: " + cluster.getSize(), Toast.LENGTH_SHORT).show();
-                return true;
-            }
+        clusterManager.setOnClusterClickListener(cluster -> {
+            Toast.makeText(MapsActivity.this, "Size: " + cluster.getSize(), Toast.LENGTH_SHORT).show();
+            return true;
         });
     }
 
