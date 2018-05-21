@@ -11,7 +11,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +39,7 @@ import com.google.maps.android.clustering.ClusterManager;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -48,11 +51,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FloatingActionButton showEvent, makeRoute, clearMap;
     private FloatingActionsMenu floatMenu;
     private Polyline route;
-    private AlertDialog dialog;
-    private View dialogView;
+    private AlertDialog dialog, markerDialog, clusterDialog;
+    private View dialogView, markerDialogView, clusterDialogView;
     private Button tamam, baskaTarih;
     private Spinner dates, cities, categories;
-    private TextView secilenTarih;
+    private TextView secilenTarih, tName, tDate, tLink, tAddress, tPlacename, tCategory;
     private DatePickerDialog dateDialog;
     private Calendar cal;
     private SimpleDateFormat sdf;
@@ -62,6 +65,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ClusterManager<Event> clusterManager;
     private List<Event> events;
     private List<Circle> circles;
+    private ListView eventListview;
+    private ArrayAdapter<Event> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +88,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .setView(dialogView)
                 .setTitle("Show events")
                 .create();
+        markerDialogView = getLayoutInflater().inflate(R.layout.marker_detail, null);
+        markerDialog = new AlertDialog.Builder(this)
+                .setView(markerDialogView)
+                .setTitle("Event details")
+                .create();
+        clusterDialogView = getLayoutInflater().inflate(R.layout.cluster_view, null);
+        clusterDialog = new AlertDialog.Builder(this)
+                .setView(clusterDialogView)
+                .setTitle("Event list")
+                .create();
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        eventListview = clusterDialogView.findViewById(R.id.inside_cluster);
+        tAddress = markerDialogView.findViewById(R.id.e_address);
+        tCategory = markerDialogView.findViewById(R.id.e_category);
+        tDate = markerDialogView.findViewById(R.id.e_date);
+        tLink = markerDialogView.findViewById(R.id.e_link);
+        tName = markerDialogView.findViewById(R.id.e_name);
+        tPlacename = markerDialogView.findViewById(R.id.e_place_name);
         tamam = dialogView.findViewById(R.id.tamam_button);
         baskaTarih = dialogView.findViewById(R.id.pick_date);
         dates = dialogView.findViewById(R.id.spinner_date);
@@ -136,7 +159,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 circle.remove();
             }
             circles.clear();
-            route.remove();
+            if (route != null && route.isVisible()) {
+                route.remove();
+            }
         });
         baskaTarih.setOnClickListener(view -> {
             dateDialog.show();
@@ -281,14 +306,32 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         clusterManager.setRenderer(new EventRenderer(this, mMap, clusterManager));
         clusterManager.setOnClusterItemClickListener(event -> {
             Log.i(TAG, "setupClusterManager: " + event.toString());
-            //todo etkinliğin detayları bir dialogta gösterilecek
+            showEventDialog(event);
             return true;
         });
         clusterManager.setOnClusterClickListener(cluster -> {
             Toast.makeText(MapsActivity.this, "Size: " + cluster.getSize(), Toast.LENGTH_SHORT).show();
-            //todo cluster içerisindeki etkinlikler bir liste halinde gösterilecek
+            Collection<Event> items = cluster.getItems();
+            adapter.clear();
+            adapter.addAll(items);
+            eventListview.setAdapter(adapter);
+            clusterDialog.show();
+            eventListview.setOnItemClickListener((adapterView, view, i, l) -> {
+                Event e = (Event) adapterView.getItemAtPosition(i);
+                showEventDialog(e);
+            });
             return true;
         });
+    }
+
+    private void showEventDialog(Event event) {
+        tPlacename.setText(event.getPlaceName());
+        tLink.setText(event.getLink());
+        tCategory.setText("Category: " + event.getCategory().getCategory());
+        tName.setText(event.getName());
+        tDate.setText("Date: " + event.getDate());
+        tAddress.setText(event.getPlace().getAddress());
+        markerDialog.show();
     }
 
     private void createRoute(ArrayList<LatLng> points) {
