@@ -1,5 +1,8 @@
 package com.farukkaradeniz.etkinlikyogunluguharitasi;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.firebase.firestore.Exclude;
 
 /**
@@ -9,7 +12,7 @@ import com.google.firebase.firestore.Exclude;
  * LinkedIn: linkedin.com/in/FarukKaradeniz
  * Website: farukkaradeniz.com
  */
-public class Place {
+public class Place implements Parcelable {
     private String name;
     private String city;
     private String streetAddress;
@@ -116,4 +119,49 @@ public class Place {
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
+
+    @Exclude
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Exclude
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.name);
+        dest.writeString(this.city);
+        dest.writeString(this.streetAddress);
+        dest.writeString(this.address);
+        dest.writeDouble(this.lat);
+        dest.writeDouble(this.lng);
+        dest.writeInt(this.capacity);
+        dest.writeInt(this.averageGuestCount);
+        dest.writeInt(this.crowdGrade);
+    }
+
+    protected Place(Parcel in) {
+        this.name = in.readString();
+        this.city = in.readString();
+        this.streetAddress = in.readString();
+        this.address = in.readString();
+        this.lat = in.readDouble();
+        this.lng = in.readDouble();
+        this.capacity = in.readInt();
+        this.averageGuestCount = in.readInt();
+        this.crowdGrade = in.readInt();
+    }
+
+    @Exclude
+    public static final Parcelable.Creator<Place> CREATOR = new Parcelable.Creator<Place>() {
+        @Override
+        public Place createFromParcel(Parcel source) {
+            return new Place(source);
+        }
+
+        @Override
+        public Place[] newArray(int size) {
+            return new Place[size];
+        }
+    };
 }

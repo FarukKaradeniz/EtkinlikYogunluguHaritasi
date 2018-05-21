@@ -1,5 +1,8 @@
 package com.farukkaradeniz.etkinlikyogunluguharitasi;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.Exclude;
 import com.google.maps.android.clustering.ClusterItem;
@@ -11,7 +14,7 @@ import com.google.maps.android.clustering.ClusterItem;
  * LinkedIn: linkedin.com/in/FarukKaradeniz
  * Website: farukkaradeniz.com
  */
-public class Event implements ClusterItem {
+public class Event implements ClusterItem, Parcelable {
     private String name;
     private String date;
     private String link;
@@ -132,4 +135,47 @@ public class Event implements ClusterItem {
     public void setNumberOfParticipants(int numberOfParticipants) {
         this.numberOfParticipants = numberOfParticipants;
     }
+
+    @Exclude
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Exclude
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.name);
+        dest.writeString(this.date);
+        dest.writeString(this.link);
+        dest.writeParcelable(this.place, flags);
+        dest.writeByte(this.isEventHappened ? (byte) 1 : (byte) 0);
+        dest.writeString(this.placeName);
+        dest.writeParcelable(this.category, flags);
+        dest.writeInt(this.numberOfParticipants);
+    }
+
+    protected Event(Parcel in) {
+        this.name = in.readString();
+        this.date = in.readString();
+        this.link = in.readString();
+        this.place = in.readParcelable(Place.class.getClassLoader());
+        this.isEventHappened = in.readByte() != 0;
+        this.placeName = in.readString();
+        this.category = in.readParcelable(Category.class.getClassLoader());
+        this.numberOfParticipants = in.readInt();
+    }
+
+    @Exclude
+    public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
+        @Override
+        public Event createFromParcel(Parcel source) {
+            return new Event(source);
+        }
+
+        @Override
+        public Event[] newArray(int size) {
+            return new Event[size];
+        }
+    };
 }
