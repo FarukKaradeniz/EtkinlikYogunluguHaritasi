@@ -40,7 +40,6 @@
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps" />
         <activity android:name=".MakeRouteActivity" />
-        <activity android:name=".EventFilterActivity"></activity>
     </application>
 
 </manifest>
