@@ -30,6 +30,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.maps.android.clustering.Cluster;
+import com.google.maps.android.clustering.ClusterManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,7 +58,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String formatDate, format2Date;
     private FirebaseFirestore firestore;
     private CollectionReference eventRef, placeRef;
-    private ArrayList<Event> events;
+    private ClusterManager<Event> clusterManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +70,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void init() {
-        events = new ArrayList<>();
         showEvent = findViewById(R.id.action_event);
         makeRoute = findViewById(R.id.action_route);
         clearMap = findViewById(R.id.action_clear);
@@ -124,6 +125,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
         clearMap.setOnClickListener(view -> {
             Toast.makeText(this, "Clear the Map", Toast.LENGTH_SHORT).show();
+            clusterManager.clearItems();
         });
         baskaTarih.setOnClickListener(view -> {
             dateDialog.show();
@@ -215,10 +217,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                             Place place = document.toObject(Place.class);
                                             event.setPlace(place);
                                             // todo haritada eklenme kısmı
+                                            clusterManager.addItem(event);
+                                            clusterManager.cluster();
                                         }
                                     }
                                 });
-                        events.add(event);
+
                         Log.i(TAG, "listeners: event:" + event.toString());
                     }
                 } else {
@@ -237,7 +241,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         uiSettings.setMapToolbarEnabled(true);
         uiSettings.setCompassEnabled(true);
         uiSettings.setMyLocationButtonEnabled(true);
-
+        setupClusterManager();
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(41.052, 29.001), 12f));
     }
 
@@ -264,6 +268,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             createRoute(points);
             Log.i(TAG, "onActivityResult: Route points size: " + points.size());
         }
+    }
+
+    private void setupClusterManager() {
+        clusterManager = new ClusterManager<>(this, mMap);
+        mMap.setOnCameraIdleListener(clusterManager);
+        mMap.setOnMarkerClickListener(clusterManager);
+        clusterManager.setRenderer(new EventRenderer(this, mMap, clusterManager));
+        clusterManager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<Event>() {
+            @Override
+            public boolean onClusterClick(Cluster<Event> cluster) {
+                Toast.makeText(MapsActivity.this, "Size: " + cluster.getSize(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
     }
 
     private void createRoute(ArrayList<LatLng> points) {
