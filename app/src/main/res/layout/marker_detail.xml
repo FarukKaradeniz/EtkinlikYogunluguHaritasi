@@ -65,6 +65,7 @@
                 android:padding="8dp"
                 android:text="@string/link"
                 android:textSize="18sp"
+                android:autoLink="web"
                 android:textStyle="italic" />
 
         </LinearLayout>
