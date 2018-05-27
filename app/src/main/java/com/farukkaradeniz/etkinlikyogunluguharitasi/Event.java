@@ -40,8 +40,8 @@ public class Event implements ClusterItem, Parcelable {
     @Override
     public String toString() {
         return String.format("{\n(name: %s)\n(date: %s)\n" +
-                        "(link: %s)\n(place: %s)\n}",
-                name, date, link, place);
+                        "(link: %s)\n(place: %s)\n(category: %s)\n}",
+                name, date, link, place, category);
     }
 
     @Override

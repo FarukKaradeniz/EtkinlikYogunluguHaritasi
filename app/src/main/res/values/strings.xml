@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">Etkinlik Yogunluğu Haritası</string>
     <string name="title_activity_maps">Map</string>
+    <string name="haritayi_ac">Haritayı aç</string>
+    <string name="rota_olustur">Rota oluştur</string>
+    <string name="isim">İsim</string>
+    <string name="kategori">Kategori</string>
+    <string name="tarih">Tarih</string>
+    <string name="adres">Adres</string>
+    <string name="mekan_ismi">Mekan ismi</string>
+    <string name="link">Link</string>
 
     <string-array name="dates">
         <item>Bugün</item>

@@ -41,7 +41,7 @@
             app:fab_colorNormal="@color/colorAccent"
             app:fab_colorPressed="@color/colorAccentDark"
             app:fab_icon="@drawable/ic_clear_all_black_24dp"
-            app:fab_title="Clear the Map" />
+            app:fab_title="Haritayı temizle" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/action_event"
@@ -50,7 +50,7 @@
             app:fab_colorNormal="@color/colorAccent"
             app:fab_colorPressed="@color/colorAccentDark"
             app:fab_icon="@drawable/ic_event_black_24dp"
-            app:fab_title="Show Events" />
+            app:fab_title="Etkinlikleri göster" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/action_route"
@@ -59,7 +59,7 @@
             app:fab_colorNormal="@color/colorAccent"
             app:fab_colorPressed="@color/colorAccentDark"
             app:fab_icon="@drawable/ic_directions_black_24dp"
-            app:fab_title="Make Route" />
+            app:fab_title="Rota oluştur" />
 
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>

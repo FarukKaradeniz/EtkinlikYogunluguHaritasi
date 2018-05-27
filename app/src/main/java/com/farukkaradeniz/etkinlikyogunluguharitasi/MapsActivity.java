@@ -86,17 +86,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         dialogView = getLayoutInflater().inflate(R.layout.event_filter_dialog, null);
         dialog = new AlertDialog.Builder(this)
                 .setView(dialogView)
-                .setTitle("Show events")
+                .setTitle("Etkinlikleri göster")
                 .create();
         markerDialogView = getLayoutInflater().inflate(R.layout.marker_detail, null);
         markerDialog = new AlertDialog.Builder(this)
                 .setView(markerDialogView)
-                .setTitle("Event details")
+                .setTitle("Etkinlik detayları")
                 .create();
         clusterDialogView = getLayoutInflater().inflate(R.layout.cluster_view, null);
         clusterDialog = new AlertDialog.Builder(this)
                 .setView(clusterDialogView)
-                .setTitle("Event list")
+                .setTitle("Etkinlik listesi")
                 .create();
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         eventListview = clusterDialogView.findViewById(R.id.inside_cluster);
@@ -327,9 +327,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void showEventDialog(Event event) {
         tPlacename.setText(event.getPlaceName());
         tLink.setText(event.getLink());
-        tCategory.setText("Category: " + event.getCategory().getCategory());
+        tCategory.setText("Kategori: " + event.getCategory().getCategory());
         tName.setText(event.getName());
-        tDate.setText("Date: " + event.getDate());
+        tDate.setText("Tarih: " + event.getDate());
         tAddress.setText(event.getPlace().getAddress());
         markerDialog.show();
     }

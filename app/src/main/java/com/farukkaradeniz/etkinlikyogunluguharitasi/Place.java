@@ -92,8 +92,8 @@ public class Place implements Parcelable {
     @Override
     public String toString() {
         return String.format("{\n(name: %s)\n(lat: %s)\n" +
-                        "(lng: %s)\n(address: %s)\n}",
-                name, lat, lng, address);
+                        "(lng: %s)\n(address: %s)\n(grade: %d)\n}",
+                name, lat, lng, address, crowdGrade);
     }
 
     public int getCrowdGrade() {

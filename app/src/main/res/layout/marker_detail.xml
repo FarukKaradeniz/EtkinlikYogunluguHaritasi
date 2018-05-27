@@ -23,7 +23,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="Name"
+                android:text="@string/isim"
                 android:textSize="18sp" />
 
             <TextView
@@ -31,7 +31,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="Category"
+                android:text="@string/kategori"
                 android:textSize="18sp" />
 
             <TextView
@@ -39,7 +39,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="Date"
+                android:text="@string/tarih"
                 android:textSize="18sp" />
 
             <TextView
@@ -47,7 +47,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="Address"
+                android:text="@string/adres"
                 android:textSize="18sp" />
 
             <TextView
@@ -55,7 +55,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="Place Name"
+                android:text="@string/mekan_ismi"
                 android:textSize="18sp" />
 
             <TextView
@@ -63,7 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="Link"
+                android:text="@string/link"
                 android:textSize="18sp"
                 android:textStyle="italic" />
 

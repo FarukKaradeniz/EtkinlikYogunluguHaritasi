@@ -45,13 +45,7 @@ public class EventRenderer extends DefaultClusterRenderer<Event> {
         //TODO Daha iyi bir algoritma ile cluster'ların renkleri güncellenecek
         int clusterSize = cluster.getSize();
         Drawable clusterIcon = context.getDrawable(R.drawable.ic_circle_48dp);
-        if (clusterSize < 10) {
-            clusterIcon.setColorFilter(context.getResources().getColor(R.color.grade_level_1), PorterDuff.Mode.SRC_ATOP);
-        } else if (clusterSize >= 10 && clusterSize < 20) {
-            clusterIcon.setColorFilter(context.getResources().getColor(R.color.grade_level_3), PorterDuff.Mode.SRC_ATOP);
-        } else {
-            clusterIcon.setColorFilter(context.getResources().getColor(R.color.grade_level_5), PorterDuff.Mode.SRC_ATOP);
-        }
+        clusterIcon.setColorFilter(returnClusterColor(cluster), PorterDuff.Mode.SRC_ATOP);
         ic.setBackground(clusterIcon);
         if (clusterSize < 10) {
             ic.setContentPadding(40, 28, 0, 0);
@@ -71,6 +65,26 @@ public class EventRenderer extends DefaultClusterRenderer<Event> {
     @Override
     protected boolean shouldRenderAsCluster(Cluster<Event> cluster) {
         return cluster.getSize() > 6;
+    }
+
+    private int returnClusterColor(Cluster<Event> cluster) {
+        int avg = 0;
+        for (Event event : cluster.getItems()) {
+            avg += event.getPlace().getCrowdGrade();
+        }
+        avg /= cluster.getSize();
+        switch (avg) {
+            case 1:
+                return context.getResources().getColor(R.color.grade_level_1);
+            case 2:
+                return context.getResources().getColor(R.color.grade_level_2);
+            case 3:
+                return context.getResources().getColor(R.color.grade_level_3);
+            case 4:
+                return context.getResources().getColor(R.color.grade_level_4);
+            default:
+                return context.getResources().getColor(R.color.grade_level_5);
+        }
     }
 
     private float getMarkerColor(int grade) {
