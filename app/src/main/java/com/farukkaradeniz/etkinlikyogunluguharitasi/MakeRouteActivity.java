@@ -110,6 +110,8 @@ public class MakeRouteActivity extends AppCompatActivity implements RoutingListe
         Intent intent = getIntent();
         ArrayList<LatLng> points = ((ArrayList<LatLng>) route.getPoints());
         intent.putParcelableArrayListExtra("points", points);
+        intent.putExtra("duration", route.getDurationText());
+        intent.putExtra("distance", route.getDistanceText());
         setResult(RESULT_OK, intent);
         finish();
     }

@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -42,6 +43,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -58,7 +60,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView secilenTarih, tName, tDate, tLink, tAddress, tPlacename, tCategory;
     private DatePickerDialog dateDialog;
     private Calendar cal;
-    private SimpleDateFormat sdf;
+    private SimpleDateFormat sdf, gosterilecekTarihFormati;
     private String formatDate, format2Date;
     private FirebaseFirestore firestore;
     private CollectionReference eventRef, placeRef;
@@ -118,6 +120,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         cal = Calendar.getInstance();
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        gosterilecekTarihFormati = new SimpleDateFormat("dd MMMM yyyy EEEE", new Locale("tr", "TR"));
+        Log.i(TAG, "FORMAT, " + gosterilecekTarihFormati.format(new Date()));
         formatDate = sdf.format(cal.getTime());
         format2Date = "";
         dateDialog = new DatePickerDialog(this, (datePicker, i, i1, i2) -> {
@@ -132,7 +136,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             cal.set(Calendar.MINUTE, 59);
             cal.set(Calendar.SECOND, 59);
             format2Date = sdf.format(cal.getTime());
-            secilenTarih.setText("Secilen Tarihler: \n" + formatDate + "\n" + format2Date);
+            secilenTarih.setText("Secilen Tarih: \n" + gosterilecekTarihFormati.format(date));
         }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
 
         firestore = FirebaseFirestore.getInstance();
@@ -178,13 +182,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     cal.set(Calendar.HOUR_OF_DAY, 0);
                     cal.set(Calendar.MINUTE, 0);
                     cal.set(Calendar.SECOND, 0);
-
-                    formatDate = sdf.format(cal.getTime());
+                    Date ilk = cal.getTime();
+                    formatDate = sdf.format(ilk);
                     cal.set(Calendar.HOUR_OF_DAY, 23);
                     cal.set(Calendar.MINUTE, 59);
                     cal.set(Calendar.SECOND, 59);
                     format2Date = sdf.format(cal.getTime());
-                    secilenTarih.setText("Secilen Tarihler: \n" + formatDate + "\n" + format2Date);
+                    secilenTarih.setText("Secilen Tarih: \n" + gosterilecekTarihFormati.format(ilk));
                 } else if (date.equals("Bu Haftasonu")) {
                     cal = Calendar.getInstance();
                     if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
@@ -196,7 +200,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         cal.set(Calendar.MINUTE, 59);
                         cal.set(Calendar.SECOND, 59);
                         format2Date = sdf.format(cal.getTime());
-                        secilenTarih.setText("Secilen Tarihler: \n" + formatDate + "\n" + format2Date);
+                        secilenTarih.setText("Secilen Tarih: \n" + gosterilecekTarihFormati.format(pazar));
                     } else {
                         while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
                             cal.add(Calendar.DAY_OF_MONTH, 1);
@@ -208,12 +212,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 } else if (date.equals("Bugün")) {
                     cal = Calendar.getInstance();
-                    formatDate = sdf.format(cal.getTime());
+                    Date ilk = cal.getTime();
+                    formatDate = sdf.format(ilk);
                     cal.set(Calendar.HOUR_OF_DAY, 23);
                     cal.set(Calendar.MINUTE, 59);
                     cal.set(Calendar.SECOND, 59);
                     format2Date = sdf.format(cal.getTime());
-                    secilenTarih.setText("Secilen Tarihler: \n" + formatDate + "\n" + format2Date);
+                    secilenTarih.setText("Secilen Tarih: \n" + gosterilecekTarihFormati.format(ilk));
                 }
             }
 
@@ -253,6 +258,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                             clusterManager.addItem(event);
                                             clusterManager.cluster();
                                         }
+                                    } else {
+                                        Log.e(TAG, "listeners: ERROR GETTING DATA");
                                     }
                                 });
                     }
@@ -295,7 +302,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (requestCode == 11 && resultCode == RESULT_OK) {
             floatMenu.collapse();
             ArrayList<LatLng> points = data.getParcelableArrayListExtra("points");
-            createRoute(points);
+            String duration = data.getStringExtra("duration");
+            String distance = data.getStringExtra("distance");
+            createRoute(points, duration, distance);
         }
     }
 
@@ -331,13 +340,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         tName.setText(event.getName());
         tDate.setText("Tarih: " + event.getDate());
         tAddress.setText(event.getPlace().getAddress());
+        //TODO O etkinkiğe gitme rotası
         markerDialog.show();
     }
 
-    private void createRoute(ArrayList<LatLng> points) {
+    private void createRoute(ArrayList<LatLng> points, String duration, String distance) {
         if (route != null && route.isVisible()) {
             route.remove();
         }
+        Log.i(TAG, "createRoute Duration: " + duration);
+        Log.i(TAG, "createRoute Distance: " + distance);
+        Snackbar.make(findViewById(R.id.main_layout), "Süre: " + duration + "\nMesafe: " + distance, Snackbar.LENGTH_INDEFINITE)
+                .setAction("OK", view -> {
+                    Log.i(TAG, "createRoute: SNACKBAR IS HIDDEN NOW");
+                })
+                .setActionTextColor(getResources().getColor(R.color.colorAccent))
+                .show();
         PolylineOptions options = new PolylineOptions();
         options.addAll(points);
         options.width(10);
@@ -377,6 +395,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Date pazar = cal.getTime();
         formatDate = sdf.format(ctesi);
         format2Date = sdf.format(pazar);
-        secilenTarih.setText("Secilen Tarihler: \n" + formatDate + "\n" + format2Date);
+        secilenTarih.setText("Secilen Tarihler: \n" +
+                gosterilecekTarihFormati.format(ctesi) + "\n" + gosterilecekTarihFormati.format(pazar));
     }
 }
