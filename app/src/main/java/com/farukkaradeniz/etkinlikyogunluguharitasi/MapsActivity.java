@@ -14,7 +14,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -49,6 +48,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.maps.android.clustering.ClusterManager;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -72,7 +72,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView secilenTarih, tName, tDate, tLink, tAddress, tPlacename, tCategory;
     private DatePickerDialog dateDialog;
     private Calendar cal;
-    private SimpleDateFormat sdf, gosterilecekTarihFormati;
+    private SimpleDateFormat sdf, gosterilecekTarihFormati, detayGosterilecek;
     private String formatDate, format2Date;
     private FirebaseFirestore firestore;
     private CollectionReference eventRef, placeRef;
@@ -80,7 +80,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private List<Event> events;
     private List<Circle> circles;
     private ListView eventListview;
-    private ArrayAdapter<Event> adapter;
+    private ClusterListViewAdapter adapter;
     private ImageView imageView;
 
     @Override
@@ -113,7 +113,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .setView(clusterDialogView)
                 .setTitle("Etkinlik listesi")
                 .create();
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        adapter = new ClusterListViewAdapter(this, new ArrayList<>());
         eventListview = clusterDialogView.findViewById(R.id.inside_cluster);
         tAddress = markerDialogView.findViewById(R.id.e_address);
         tCategory = markerDialogView.findViewById(R.id.e_category);
@@ -141,6 +141,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         cal = Calendar.getInstance();
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         gosterilecekTarihFormati = new SimpleDateFormat("dd MMMM yyyy EEEE", new Locale("tr", "TR"));
+        detayGosterilecek = new SimpleDateFormat("dd MMMM yyyy EEEE, HH:mm", new Locale("tr", "TR"));
         Log.i(TAG, "FORMAT, " + gosterilecekTarihFormati.format(new Date()));
         formatDate = sdf.format(cal.getTime());
         format2Date = "";
@@ -364,7 +365,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         tLink.setText(event.getLink());
         tCategory.setText("Kategori: " + event.getCategory().getCategory());
         tName.setText(event.getName());
-        tDate.setText("Tarih: " + event.getDate());
+        try {
+            tDate.setText("Tarih: " + detayGosterilecek.format(sdf.parse(event.getDate())));
+        } catch (ParseException e) {
+            tDate.setText("Tarih: " + event.getDate());
+        }
         tAddress.setText(event.getPlace().getAddress());
         imageView.setOnClickListener(view -> {
             LocationServices.getFusedLocationProviderClient(this)
