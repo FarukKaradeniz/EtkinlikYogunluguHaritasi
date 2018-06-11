@@ -18,7 +18,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +26,7 @@ import com.directions.route.Route;
 import com.directions.route.RouteException;
 import com.directions.route.Routing;
 import com.directions.route.RoutingListener;
+import com.farbod.labelledspinner.LabelledSpinner;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.google.android.gms.location.LocationCallback;
@@ -68,7 +68,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private AlertDialog dialog, markerDialog, clusterDialog;
     private View dialogView, markerDialogView, clusterDialogView;
     private Button tamam, baskaTarih;
-    private Spinner dates, cities, categories;
+    private LabelledSpinner cities, dates, categories;
     private TextView secilenTarih, tName, tDate, tLink, tAddress, tPlacename, tCategory;
     private DatePickerDialog dateDialog;
     private Calendar cal;
@@ -128,11 +128,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         tamam = dialogView.findViewById(R.id.tamam_button);
         baskaTarih = dialogView.findViewById(R.id.pick_date);
         dates = dialogView.findViewById(R.id.spinner_date);
-        dates.setPrompt("Lütfen Tarih Seçiniz");
+        dates.setItemsArray(R.array.dates);
+//        dates.setPrompt("Lütfen Tarih Seçiniz");
         cities = dialogView.findViewById(R.id.spinner_cities);
-        cities.setPrompt("Lütfen Şehir Seçiniz");
+        cities.setItemsArray(R.array.cities);
+//        cities.setPrompt("Lütfen Şehir Seçiniz");
         categories = dialogView.findViewById(R.id.spinner_categories);
-        categories.setPrompt("Lütfen Kategori Seçiniz");
+        categories.setItemsArray(R.array.categories);
+//        categories.setPrompt("Lütfen Kategori Seçiniz");
         secilenTarih = dialogView.findViewById(R.id.secilen_tarih);
 
         cal = Calendar.getInstance();
@@ -188,7 +191,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         baskaTarih.setOnClickListener(view -> {
             dateDialog.show();
         });
-        dates.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        dates.getSpinner().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String date = (String) adapterView.getItemAtPosition(i);
@@ -249,8 +252,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             dialog.hide();
             floatMenu.collapse();
             Toast.makeText(this, "Yükleniyor..", Toast.LENGTH_SHORT).show();
-            String city = (String) cities.getSelectedItem();
-            String category = (String) categories.getSelectedItem();
+            String city = (String) cities.getSpinner().getSelectedItem();
+            String category = (String) categories.getSpinner().getSelectedItem();
 
             Query query = eventRef.whereGreaterThanOrEqualTo("date", formatDate)
                     .whereLessThanOrEqualTo("date", format2Date);
