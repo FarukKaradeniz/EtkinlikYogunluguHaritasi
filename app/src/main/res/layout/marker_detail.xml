@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -67,6 +68,25 @@
                 android:textSize="18sp"
                 android:autoLink="web"
                 android:textStyle="italic" />
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:background="@color/colorAccent"
+                app:srcCompat="@drawable/ic_directions_black_24dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                tools:layout_editor_absoluteX="106dp"
+                tools:layout_editor_absoluteY="360dp" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Yol Tarifi Al"
+                android:textColor="@color/colorPrimary" />
 
         </LinearLayout>
     </ScrollView>

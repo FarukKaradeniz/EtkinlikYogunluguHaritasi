@@ -1,8 +1,10 @@
 package com.farukkaradeniz.etkinlikyogunluguharitasi;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -14,13 +16,23 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.directions.route.AbstractRouting;
+import com.directions.route.Route;
+import com.directions.route.RouteException;
+import com.directions.route.Routing;
+import com.directions.route.RoutingListener;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -45,7 +57,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, RoutingListener {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
@@ -69,6 +81,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private List<Circle> circles;
     private ListView eventListview;
     private ArrayAdapter<Event> adapter;
+    private ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +121,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         tLink = markerDialogView.findViewById(R.id.e_link);
         tName = markerDialogView.findViewById(R.id.e_name);
         tPlacename = markerDialogView.findViewById(R.id.e_place_name);
+        imageView = markerDialogView.findViewById(R.id.imageView);
+        imageView.setOnClickListener(view -> {
+
+        });
         tamam = dialogView.findViewById(R.id.tamam_button);
         baskaTarih = dialogView.findViewById(R.id.pick_date);
         dates = dialogView.findViewById(R.id.spinner_date);
@@ -146,6 +163,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        requestLocation();
     }
 
     private void listeners() {
@@ -300,6 +318,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 11 && resultCode == RESULT_OK) {
+            for (Circle circle : circles) {
+                circle.remove();
+            }
+            circles.clear();
             floatMenu.collapse();
             ArrayList<LatLng> points = data.getParcelableArrayListExtra("points");
             String duration = data.getStringExtra("duration");
@@ -333,6 +355,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+    @SuppressLint("MissingPermission")
     private void showEventDialog(Event event) {
         tPlacename.setText(event.getPlaceName());
         tLink.setText(event.getLink());
@@ -340,7 +363,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         tName.setText(event.getName());
         tDate.setText("Tarih: " + event.getDate());
         tAddress.setText(event.getPlace().getAddress());
-        //TODO O etkinkiğe gitme rotası
+        imageView.setOnClickListener(view -> {
+            LocationServices.getFusedLocationProviderClient(this)
+                    .getLastLocation()
+                    .addOnSuccessListener(location -> {
+                        if (location != null) {
+                            Routing build = new Routing.Builder()
+                                    .alternativeRoutes(false)
+                                    .withListener(this)
+                                    .travelMode(AbstractRouting.TravelMode.DRIVING)
+                                    .waypoints(new LatLng(location.getLatitude(), location.getLongitude()), event.getPosition())
+                                    .build();
+                            build.execute();
+                            markerDialog.hide();
+                        } else {
+                            Toast.makeText(this, "Konum servisini açınız.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        });
         markerDialog.show();
     }
 
@@ -397,5 +437,52 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         format2Date = sdf.format(pazar);
         secilenTarih.setText("Secilen Tarihler: \n" +
                 gosterilecekTarihFormati.format(ctesi) + "\n" + gosterilecekTarihFormati.format(pazar));
+    }
+
+    @Override
+    public void onRoutingFailure(RouteException e) {
+        Log.i(TAG, "onRoutingFailure: ");
+        Snackbar.make(findViewById(R.id.main_layout), "Route Failure: " + e.getMessage(), Snackbar.LENGTH_INDEFINITE)
+                .setAction("OK", view -> {
+                    Log.i(TAG, "createRoute: SNACKBAR IS HIDDEN NOW");
+                })
+                .setActionTextColor(getResources().getColor(R.color.colorAccent))
+                .show();
+    }
+
+    @Override
+    public void onRoutingStart() {
+        Log.i(TAG, "onRoutingStart: ");
+    }
+
+    @Override
+    public void onRoutingSuccess(ArrayList<Route> arrayList, int i) {
+        Log.i(TAG, "onRoutingSuccess: ");
+        Route route = arrayList.get(0);
+        createRoute((ArrayList<LatLng>) route.getPoints(), route.getDurationText(), route.getDistanceText());
+    }
+
+    @Override
+    public void onRoutingCancelled() {
+        Log.i(TAG, "onRoutingCancelled: ");
+    }
+
+    @SuppressLint("MissingPermission")
+    private void requestLocation() {
+        LocationRequest request = LocationRequest.create();
+        request.setFastestInterval(30_000);
+        request.setInterval(180_000);
+        request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        LocationCallback callback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                Location lastLocation = locationResult.getLastLocation();
+                Log.i(TAG, "onLocationResult: " + lastLocation.toString());
+            }
+        };
+        LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(request, callback, null);
     }
 }

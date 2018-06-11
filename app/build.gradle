@@ -36,6 +36,7 @@ dependencies {
     implementation 'com.google.maps.android:android-maps-utils:0.5+'
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
     implementation 'com.google.android.gms:play-services-places:15.0.1'
+    implementation 'com.google.android.gms:play-services-location:15.0.1'
     implementation 'com.github.jd-alexander:library:1.1.0'
     implementation 'com.firebase:geofire-android:2.3.1'
     implementation 'com.getbase:floatingactionbutton:1.10.1'
