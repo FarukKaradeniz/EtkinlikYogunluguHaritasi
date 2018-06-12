@@ -282,6 +282,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         }
                                     } else {
                                         Log.e(TAG, "listeners: ERROR GETTING DATA");
+                                        Toast.makeText(this, "Error getting the data from the database..", Toast.LENGTH_SHORT).show();
                                     }
                                 });
                     }
@@ -293,6 +294,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -302,7 +304,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         uiSettings.setCompassEnabled(true);
         uiSettings.setMyLocationButtonEnabled(true);
         setupClusterManager();
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(41.052, 29.001), 12f));
+        LocationServices.getFusedLocationProviderClient(this)
+                .getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        Log.i(TAG, "onMapReady: ANIMATING CAMERA");
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 12f));
+                    } else {
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(41.052, 29.001), 12f));
+                    }
+                });
     }
 
     @Override
@@ -382,6 +393,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     .travelMode(AbstractRouting.TravelMode.DRIVING)
                                     .waypoints(new LatLng(location.getLatitude(), location.getLongitude()), event.getPosition())
                                     .build();
+                            Log.i(TAG, "showEventDialog_GOT LOCATION: " + location);
                             build.execute();
                             markerDialog.hide();
                         } else {
@@ -396,6 +408,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (route != null && route.isVisible()) {
             route.remove();
         }
+        for (Circle circle : circles) {
+            circle.remove();
+        }
+        circles.clear();
         Log.i(TAG, "createRoute Duration: " + duration);
         Log.i(TAG, "createRoute Distance: " + distance);
         Snackbar.make(findViewById(R.id.main_layout), "Süre: " + duration + "\nMesafe: " + distance, Snackbar.LENGTH_INDEFINITE)
@@ -449,7 +465,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onRoutingFailure(RouteException e) {
-        Log.i(TAG, "onRoutingFailure: ");
+        Log.i(TAG, "onRoutingFailure: " + e.getStatusCode());
         Snackbar.make(findViewById(R.id.main_layout), "Route Failure: " + e.getMessage(), Snackbar.LENGTH_INDEFINITE)
                 .setAction("OK", view -> {
                     Log.i(TAG, "createRoute: SNACKBAR IS HIDDEN NOW");
