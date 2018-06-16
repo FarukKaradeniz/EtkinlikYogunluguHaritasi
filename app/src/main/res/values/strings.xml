@@ -23,6 +23,7 @@
         <item>Ağrı</item>
         <item>Amasya</item>
         <item>Ankara</item>
+        <item>Ankara/Çankaya</item>
         <item>Antalya</item>
         <item>Artvin</item>
         <item>Aydın</item>
@@ -50,7 +51,13 @@
         <item>Isparta</item>
         <item>Mersin</item>
         <item>İstanbul</item>
+        <item>İstanbul/Beşiktaş</item>
+        <item>İstanbul/Beyoğlu</item>
+        <item>İstanbul/Kadıköy</item>
         <item>İzmir</item>
+        <item>İzmir/Bornova</item>
+        <item>İzmir/Çeşme</item>
+        <item>İzmir/Konak</item>
         <item>Kars</item>
         <item>Kastamonu</item>
         <item>Kayseri</item>

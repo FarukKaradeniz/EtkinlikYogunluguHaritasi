@@ -40,6 +40,8 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.firestore.CollectionReference;
@@ -47,6 +49,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.maps.android.clustering.ClusterManager;
+
+import org.json.JSONException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,6 +69,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FloatingActionButton showEvent, makeRoute, clearMap;
     private FloatingActionsMenu floatMenu;
     private Polyline route;
+    private Polygon polygon;
     private AlertDialog dialog, markerDialog, clusterDialog;
     private View dialogView, markerDialogView, clusterDialogView;
     private Button tamam, baskaTarih;
@@ -82,6 +87,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ListView eventListview;
     private ClusterListViewAdapter adapter;
     private ImageView imageView;
+    private String city;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,6 +194,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (route != null && route.isVisible()) {
                 route.remove();
             }
+            if (polygon != null && polygon.isVisible()) {
+                polygon.remove();
+            }
         });
         baskaTarih.setOnClickListener(view -> {
             dateDialog.show();
@@ -252,8 +261,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         tamam.setOnClickListener(view -> {
             dialog.hide();
             floatMenu.collapse();
+            clusterManager.clearItems();
+            if (polygon != null && polygon.isVisible()) {
+                polygon.remove();
+            }
             Toast.makeText(this, "Yükleniyor..", Toast.LENGTH_SHORT).show();
-            String city = (String) cities.getSpinner().getSelectedItem();
+            city = (String) cities.getSpinner().getSelectedItem();
+            String[] split = city.split("/");
+            if (split.length == 2) {
+                city = split[0];
+                try {
+                    List<LatLng> polyPoint = Utils.getPolygon(split[1]);
+                    polygon = mMap.addPolygon(new PolygonOptions()
+                            .addAll(polyPoint)
+                            .fillColor(0x66_44_ff_dd)
+                            .strokeColor(0x66_33_bb_aa)
+                    );
+
+                } catch (JSONException e) {
+                    Toast.makeText(this, "Error creating Polygon", Toast.LENGTH_SHORT).show();
+                }
+            }
             String category = (String) categories.getSpinner().getSelectedItem();
 
             Query query = eventRef.whereGreaterThanOrEqualTo("date", formatDate)
