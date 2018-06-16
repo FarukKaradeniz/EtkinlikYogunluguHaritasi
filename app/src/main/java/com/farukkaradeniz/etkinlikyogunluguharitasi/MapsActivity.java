@@ -93,6 +93,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        getSupportActionBar().setTitle("Harita");
         init();
         listeners();
     }
@@ -279,7 +280,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     );
 
                 } catch (JSONException e) {
-                    Toast.makeText(this, "Error creating Polygon", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Polygon oluştururken hata", Toast.LENGTH_SHORT).show();
                 }
             }
             String category = (String) categories.getSpinner().getSelectedItem();
@@ -310,12 +311,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         }
                                     } else {
                                         Log.e(TAG, "listeners: ERROR GETTING DATA");
-                                        Toast.makeText(this, "Error getting the data from the database..", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(this, "Veritabanı ile ilgili hata oluştu..", Toast.LENGTH_SHORT).show();
                                     }
                                 });
                     }
                 } else {
-                    Toast.makeText(this, "Error getting the data from the database", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Veritabanı ile ilgili hata oluştu", Toast.LENGTH_SHORT).show();
                 }
             });
         });
@@ -443,7 +444,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.i(TAG, "createRoute Duration: " + duration);
         Log.i(TAG, "createRoute Distance: " + distance);
         Snackbar.make(findViewById(R.id.main_layout), "Süre: " + duration + "\nMesafe: " + distance, Snackbar.LENGTH_INDEFINITE)
-                .setAction("OK", view -> {
+                .setAction("TAMAM", view -> {
                     Log.i(TAG, "createRoute: SNACKBAR IS HIDDEN NOW");
                 })
                 .setActionTextColor(getResources().getColor(R.color.colorAccent))
@@ -494,8 +495,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onRoutingFailure(RouteException e) {
         Log.i(TAG, "onRoutingFailure: " + e.getStatusCode());
-        Snackbar.make(findViewById(R.id.main_layout), "Route Failure: " + e.getMessage(), Snackbar.LENGTH_INDEFINITE)
-                .setAction("OK", view -> {
+        Snackbar.make(findViewById(R.id.main_layout), "Rota oluştururken hata: " + e.getMessage(), Snackbar.LENGTH_INDEFINITE)
+                .setAction("TAMAM", view -> {
                     Log.i(TAG, "createRoute: SNACKBAR IS HIDDEN NOW");
                 })
                 .setActionTextColor(getResources().getColor(R.color.colorAccent))
