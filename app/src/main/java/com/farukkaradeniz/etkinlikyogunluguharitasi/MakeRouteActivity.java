@@ -95,17 +95,19 @@ public class MakeRouteActivity extends AppCompatActivity implements RoutingListe
 
     @Override
     public void onRoutingFailure(RouteException e) {
-
+        Log.i(TAG, "onRoutingFailure: " + e.getMessage());
     }
 
     @Override
     public void onRoutingStart() {
+        Log.i(TAG, "onRoutingStart: ");
         //TODO Progress bar göster. Success ve Failure'da bitir
         // Ya da şu : https://github.com/Tapadoo/Alerter kütüphane hoş duruyor onu da yapabilirsin
     }
 
     @Override
     public void onRoutingSuccess(ArrayList<Route> arrayList, int i) {
+        Log.i(TAG, "onRoutingSuccess:");
         Route route = arrayList.get(0);
         Intent intent = getIntent();
         ArrayList<LatLng> points = ((ArrayList<LatLng>) route.getPoints());

@@ -420,6 +420,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     .alternativeRoutes(false)
                                     .withListener(this)
                                     .travelMode(AbstractRouting.TravelMode.DRIVING)
+//                                    .key("AIzaSyCZn0Kw_7n01iANT0Q_-Tlpx_vUtQ8b-2Y")
                                     .waypoints(new LatLng(location.getLatitude(), location.getLongitude()), event.getPosition())
                                     .build();
                             Log.i(TAG, "showEventDialog_GOT LOCATION: " + location);
@@ -494,7 +495,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onRoutingFailure(RouteException e) {
-        Log.i(TAG, "onRoutingFailure: " + e.getStatusCode());
+        Log.i(TAG, "onRoutingFailure: " + e);
         Snackbar.make(findViewById(R.id.main_layout), "Rota oluştururken hata: " + e.getMessage(), Snackbar.LENGTH_INDEFINITE)
                 .setAction("TAMAM", view -> {
                     Log.i(TAG, "createRoute: SNACKBAR IS HIDDEN NOW");
@@ -512,7 +513,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onRoutingSuccess(ArrayList<Route> arrayList, int i) {
         Log.i(TAG, "onRoutingSuccess: ");
         Route route = arrayList.get(0);
-        createRoute((ArrayList<LatLng>) route.getPoints(), route.getDurationText(), route.getDistanceText());
+        createRoute((ArrayList<LatLng>) route.getPoints(),
+                route.getDurationText().replace("mins", "dakika").replace("hours", "saat"),
+                route.getDistanceText());
     }
 
     @Override

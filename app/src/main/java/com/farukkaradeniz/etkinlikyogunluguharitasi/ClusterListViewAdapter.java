@@ -41,9 +41,11 @@ public class ClusterListViewAdapter extends ArrayAdapter<Event> {
         TextView adres = convertView.findViewById(R.id.ec_adres);
         TextView grade = convertView.findViewById(R.id.ec_grade);
         TextView tarih = convertView.findViewById(R.id.ec_tarih);
+        TextView kat = convertView.findViewById(R.id.ec_kategori);
         name.setText(event.getName());
         adres.setText(event.getPlace().getAddress());
         grade.setText("Yoğunluk: " + event.getPlace().getCrowdGrade());
+        kat.setText("Kategori: " + event.getCategory().getCategory());
         try {
             tarih.setText(sdf.format(tmp.parse(event.getDate())));
         } catch (ParseException e) {
